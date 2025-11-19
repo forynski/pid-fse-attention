@@ -35,11 +35,11 @@ Unlike traditional neural networks, FSE+Attention explicitly handles **missing d
 
 ### State-of-the-Art Performance
 
-| Momentum Range | Accuracy | Macro-AUC | Advantage |
+| Momentum Range | Accuracy | Macro-AUC |
 |---|---|---|---|
-| **Full Spectrum (0.1–∞)** | **92.8%** | **0.9280** | +6.0% vs SimpleNN |
-| **0.7–1.5 GeV/c (Critical)** | **89.2%** | **0.8916** | +3.6% vs SimpleNN |
-| **1–3 GeV/c (Intermediate)** | **82.4%** | **0.8238** | +2.1% vs SimpleNN |
+| **Full Spectrum (0.1–∞)** | **92.8%** | **0.9280** |
+| **0.7–1.5 GeV/c (Critical)** | **89.2%** | **0.8916** |
+| **1–3 GeV/c (Intermediate)** | **82.4%** | **0.8238** |
 
 ### Per-Class Performance (Full Spectrum)
 
