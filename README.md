@@ -110,21 +110,46 @@ Classification Head
 Output: Particle Probabilities
 ```
 
+## Data Preprocessing & Missing Data Handling
+
+### Strategy
+
+**1. Detector Masking (TPC, TOF):**
+- Create explicit masks indicating detector hardware availability
+- Masks passed to FSE+Attention model via `has_tpc` and `has_tof` flags
+- Model learns to ignore (zero-out via attention) features when mask=0
+
+**2. Value Filling (Bayes, Kinematics):**
+- **Bayes missing values:** Fill with 0.25 (uniform probability across all 4 classes)
+- **Kinematics missing values:** Fill with per-feature median values
+- Prevents numerical issues in JAX tensor computations
+- Model learns these filled values are uninformative during training
+
 ### Detector Availability (Pb-Pb Run 3)
 
-```
-Detector Group | Availability | Critical?
-TPC            | 89.6%        | High (always has charge info)
-TOF            | 8.5%         | VERY HIGH (only for pion/kaon separation)
-Bayes          | 100%         | Moderate (baseline probabilities)
-Kinematics     | 100%         | Low (always present, less discriminative)
+| Detector Group | Raw Availability | Handling Strategy | After Preprocessing | Critical? |
+|---|---|---|---|---|
+| **TPC** | 89.6% | Detector mask (attention zeros out when unavailable) | 89.6% tracked via mask | High |
+| **TOF** | 8.5% | Detector mask (attention zeros out when unavailable) | 8.5% tracked via mask | **VERY HIGH** |
+| **Bayes** | ~97%* | Fill NaN with 0.25 (uniform probability) | 100% after preprocessing | Moderate |
+| **Kinematics** | ~99%* | Fill NaN with median value | 100% after preprocessing | Low |
 
-Challenge: TOF only 8.5% in critical 0.7-1.5 GeV/c range
-Solution: FSE+Attention learns to upweight TPC when TOF missing
-```
+*Estimated - actual values depend on your specific dataset
+
+### Key Insights
+
+**Challenge:** TOF only 8.5% in critical 0.7-1.5 GeV/c range, making pion/kaon separation extremely difficult
+
+**Solution:** FSE+Attention learns to **upweight TPC when TOF is masked out**, effectively compensating for missing TOF data
+
+**Why Attention is Superior:**
+- Unlike traditional networks that assume complete data, FSE+Attention learns **adaptive detector weighting**
+- Attention mechanism discovers which detectors matter most per event
+- Gracefully handles the extreme TOF scarcity (8.5%) that would handicap dense networks
+
+---
 
 ## Evaluation Metrics
-
 
 ### Computed in Section 4
 
@@ -250,23 +275,3 @@ Permission is hereby granted, free of charge, to any person obtaining a copy...
 - **scikit-learn Contributors** for machine learning utilities
 - Reviewers and contributors to the project
 
----
-
-## Status
-
-| Component | Status |
-|-----------|--------|
-| FSE+Attention Model | **Production Ready** |
-| Training Pipeline | Complete |
-| Evaluation Metrics | Complete |
-| Model Persistence | Two-tier system |
-| ONNX Export | In Development |
-| DANN Implementation | In Development |
-| Documentation | Complete |
-
----
-
-**Last Updated:** November 2025  
-**Python Version:** 3.9+  
-**JAX Version:** 0.4.0+  
-**Tested on:** Kaggle (GPU), Google Colab (GPU/TPU)
