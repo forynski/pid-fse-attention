@@ -121,8 +121,10 @@ Kinematics     | 100%         | Low (always present, less discriminative)
 
 Challenge: TOF only 8.5% in critical 0.7-1.5 GeV/c range
 Solution: FSE+Attention learns to upweight TPC when TOF missing
+```
 
 ## Evaluation Metrics
+
 
 ### Computed in Section 4
 
